@@ -2,6 +2,7 @@ namespace :load do
 	task :defaults do
 		set :systemd_unit, ->{ fetch :application }
 		set :systemd_use_sudo, false
+		set :systemd_as_user, false
 		set :systemd_roles, %w(app)
 	end
 end
@@ -11,7 +12,7 @@ namespace :systemd do
 		desc "#{command.capitalize} service"
 		task command do
 			on roles fetch :systemd_roles do
-				systemctl :"#{command}", fetch(:systemd_unit)
+				systemctl :"#{command}", fetch(:systemd_unit), fetch(:systemd_as_user) ? "--user" : ""
 			end
 		end
 	end
@@ -19,14 +20,14 @@ namespace :systemd do
 	desc "Show the status of service"
 	task :status do
 		on roles fetch :systemd_roles do
-			systemctl :status, fetch(:systemd_unit)
+			systemctl :status, fetch(:systemd_unit), fetch(:systemd_as_user) ? "--user" : ""
 		end
 	end
 
 	desc "Reload systemd manager configuration"
 	task "daemon-reload" do
 		on roles fetch :systemd_roles do
-			systemctl :"daemon-reload"
+			systemctl :"daemon-reload", fetch(:systemd_as_user) ? "--user" : ""
 		end
 	end
 
